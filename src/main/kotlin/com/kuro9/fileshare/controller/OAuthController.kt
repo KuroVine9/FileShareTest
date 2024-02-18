@@ -36,7 +36,7 @@ class OAuthController(
 
     @GetMapping("/redirect")
     @PostMapping("/redirect")
-    fun redirect(@RequestParam code: String, request: HttpServletRequest ,response: HttpServletResponse): ModelAndView {
+    fun redirect(@RequestParam code: String, request: HttpServletRequest, response: HttpServletResponse): ModelAndView {
         val mav = ModelAndView("error/StandardErrorPage")
         logger.info("code={}", code)
         val result = oAuthApiService.getToken(code) ?: return mav.apply {
@@ -47,7 +47,7 @@ class OAuthController(
 
         logger.info("result={}", result)
         val cookie = Cookie("access_token", result.access_token)
-        cookie.domain = "localhost"
+        cookie.domain = appConfig.general.domain
         cookie.path = "/"
         cookie.maxAge = if (result.expires_in >= Int.MAX_VALUE.toLong()) Int.MAX_VALUE else result.expires_in.toInt()
         cookie.secure = true
