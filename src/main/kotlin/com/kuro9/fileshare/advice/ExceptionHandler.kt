@@ -1,6 +1,7 @@
 package com.kuro9.fileshare.advice
 
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.servlet.ModelAndView
@@ -26,5 +27,10 @@ class ExceptionHandler {
             addObject("description", "올바른 값을 입력하거나 잠시 뒤 시도해 주십시오.")
         }
         return modelAndView
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun unknownException(e: Exception): ResponseEntity<Any> {
+        return ResponseEntity.internalServerError().build()
     }
 }
