@@ -1,11 +1,15 @@
 package com.kuro9.fileshare.dataclass
 
 import lombok.Data
+import org.springframework.data.annotation.Id
+import org.springframework.data.redis.core.RedisHash
+import org.springframework.data.redis.core.TimeToLive
 
 @Data
+@RedisHash(value = "oauth_result")
 data class OAuthResultVo(
-    val access_token: String,
+    @Id val access_token: String,
     val token_type: String,
-    val expires_in: Long,
+    @TimeToLive val expires_in: Long,
     val scope: String
 )
