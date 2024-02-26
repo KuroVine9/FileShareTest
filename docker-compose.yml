@@ -1,6 +1,22 @@
 # redis-server.yml
 version: '3.7'
 services:
+  was:
+    container_name: was
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - REQUEST_URL_DEV=http://localhost:8080/oauth/token
+      - CLIENT_ID=client
+      - CLIENT_SECRET=secret
+      - GRANT_TYPE=password
+      - SCOPE=read
+    networks:
+      default:
   redis:
     image: redis:alpine
     command: redis-server --port 6379
@@ -11,3 +27,17 @@ services:
       - "mode=standalone"
     ports:
       - "6379:6379"
+  mysql:
+    image: mysql:8.3
+    container_name: rdbms_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: verysupersecret
+      MYSQL_DATABASE: file_share
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: verysupersecret
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      default:

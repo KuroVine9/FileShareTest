@@ -6,6 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.4"
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.spring") version "1.9.22"
+    kotlin("plugin.jpa") version "1.9.22"
 }
 
 group = "com.kuro9"
@@ -44,6 +45,9 @@ dependencies {
     implementation("org.apache.tomcat.embed:tomcat-embed-jasper")
     implementation("org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.0")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("mysql:mysql-connector-java:8.0.32")
 }
 
 tasks.withType<KotlinCompile> {

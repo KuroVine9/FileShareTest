@@ -8,14 +8,23 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/
+    username: testuser
+    password: verysupersecret
+
+
+
+
 server:
   port: 3000
-  
+
 app:
   general:
     domain: localhost
   oauth:
-    request-url: ${REQUST_URL_DEV}
+    request-url: ${REQUEST_URL_DEV}
     client-id: ${CLIENT_ID}
     client-secret: ${CLIENT_SECRET}
     grant-type: ${GRANT_TYPE}
