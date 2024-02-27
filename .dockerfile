@@ -16,8 +16,8 @@ WORKDIR /app
 # 빌더 이미지에서 jar 파일만 복사
 COPY --from=builder /build/build/libs/FileShare-0.0.1-SNAPSHOT.war .
 
-EXPOSE 8080
-
 # root 대신 nobody 권한으로 실행
 USER nobody
 ENTRYPOINT ["java","-jar","./FileShare-0.0.1-SNAPSHOT.war"]
+
+# 출처 : https://findstar.pe.kr/2022/05/13/gradle-docker-cache/
