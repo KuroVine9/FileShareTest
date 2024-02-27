@@ -8,9 +8,10 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "3000:3000"
+      - "${SPRING_PORT}:3000"
     networks:
       - my-bridge-network
+      - default 
   redis:
     image: redis:alpine
     command: redis-server --port 6379
@@ -32,11 +33,15 @@ services:
       MYSQL_USER: testuser
       MYSQL_PASSWORD: verysupersecret
     ports:
-      - "3306:3306"
+      - "${MYSQL_PORT}:3306"
     volumes:
       - ./mysql:/var/lib/mysql
     networks:
       - my-bridge-network
+
+
 networks:
   my-bridge-network:
     driver: bridge
+
+  
