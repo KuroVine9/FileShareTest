@@ -43,6 +43,7 @@ dependencies {
 
     implementation("org.apache.tomcat.embed:tomcat-embed-jasper")
     implementation("org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.0")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
 }
 
 tasks.withType<KotlinCompile> {
