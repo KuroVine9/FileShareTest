@@ -10,9 +10,14 @@ spring:
       port: 6379
 
   datasource:
-    url: jdbc:mysql://localhost:3306/
+    url: jdbc:mysql://localhost:3306/file_share
     username: testuser
     password: verysupersecret
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
 
 
 
@@ -22,11 +27,10 @@ server:
 
 app:
   general:
-    domain: localhost
+    domain: ${DOMAIN}
   oauth:
-    request-url: ${REQUEST_URL_DEV}
     client-id: ${CLIENT_ID}
     client-secret: ${CLIENT_SECRET}
     grant-type: ${GRANT_TYPE}
-    redirect-uri: http://localhost:3000/share/files
+    redirect-uri: http://localhost:3000/oauth/redirect
     scope: ${SCOPE} 

@@ -1,6 +1,9 @@
 package com.kuro9.fileshare.controller
 
+import com.kuro9.fileshare.annotation.GetSession
 import com.kuro9.fileshare.dataclass.FileObj
+import com.kuro9.fileshare.entity.Session
+import com.kuro9.fileshare.exception.NotAuthorizedException
 import com.kuro9.fileshare.service.OAuthApiService
 import jakarta.servlet.http.HttpServletResponse
 import lombok.RequiredArgsConstructor
@@ -8,7 +11,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Controller
 import org.springframework.util.FileCopyUtils
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import org.springframework.web.servlet.ModelAndView
 import java.io.File
@@ -29,20 +35,13 @@ class FileDownloadController(
     @GetMapping("files")
     fun filePage(
         @RequestParam(defaultValue = "") dir: String,
-        @CookieValue("access_token") token: String?,
+        @GetSession user: Session
     ): ModelAndView {
         val page = ModelAndView("FilePage")
         if (dir.contains("..")) {
             throw IllegalArgumentException("Invalid directory")
         }
-
-        if (token == null) {
-            return ModelAndView("redirect:/oauth/login")
-        }
-        oAuthApiService.getUserInfo(token)?.let {
-            logger.info("filePage user={}", it)
-            page.addObject("userName", it.username)
-        } ?: return ModelAndView("redirect:/oauth/login")
+        page.addObject("userName", user.username)
 
         val fileList = File(shareFolderPath, dir).listFiles()
             ?.sortedWith(compareBy({ !it.isDirectory }, { it.name }))
@@ -62,23 +61,14 @@ class FileDownloadController(
     @GetMapping("download")
     fun downloadFile(
         @RequestParam fileName: String,
-        @CookieValue("access_token") token: String?,
+        @GetSession user: Session,
         response: HttpServletResponse
     ) {
         if (fileName.contains("..")) {
             throw IllegalArgumentException("Invalid directory")
         }
-        if (token == null) {
-            response.sendRedirect("/oauth/login")
-            return
-        }
-        val user = oAuthApiService.getUserInfo(token)
-        if (user == null) {
-            response.sendRedirect("/oauth/login")
-            return
-        }
 
-        logger.info("user={} download file={}", user, fileName)
+        logger.info("user={} download file={}", user.username, fileName)
         val file = File(shareFolderPath, fileName)
         val downloadFileName = file.name
 
@@ -104,4 +94,7 @@ class FileDownloadController(
             addObject("description", "HTTP Status: ${e.statusCode} ${e.statusText}")
         }
     }
+
+    @ExceptionHandler(NotAuthorizedException::class)
+    fun notAuthorized(e: NotAuthorizedException) = ModelAndView("redirect:/oauth/login")
 }

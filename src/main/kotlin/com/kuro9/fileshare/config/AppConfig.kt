@@ -1,6 +1,7 @@
 package com.kuro9.fileshare.config
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import java.net.URLEncoder
 
 @ConfigurationProperties(prefix = "app")
 data class AppConfig(
@@ -8,13 +9,19 @@ data class AppConfig(
     val oauth: OAuthConfig
 ) {
     data class OAuthConfig(
-        val requestUrl: String,
         val clientId: String,
         val clientSecret: String,
         val grantType: String,
         val redirectUri: String,
         val scope: String
-    )
+    ) {
+        val requestUri: String
+            get() = "https://discord.com/api/oauth2/authorize?client_id=$clientId&redirect_uri=${
+                URLEncoder.encode(
+                    redirectUri, "UTF-8"
+                )
+            }&response_type=code&scope=$scope"
+    }
 
     data class GeneralConfig(
         val domain: String

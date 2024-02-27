@@ -18,6 +18,7 @@ class SessionService(
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
 
+
     fun createSession(oauthCode: String): Session {
         val authResult = oAuth.getToken(oauthCode) ?: throw NotAuthorizedException("Not Logged In")
         val discordUserInfo =
@@ -26,8 +27,13 @@ class SessionService(
         return sessionRepo.save(sessionMapper(authResult, discordUserInfo))
     }
 
+
     fun getSession(sessionId: String): Session {
-        val session = sessionRepo.findById(sessionId).orElseThrow { NotAuthorizedException("Not Logged In") }
+        val session = sessionRepo.findById(sessionId).orElseThrow {
+            NotAuthorizedException("Not Logged In-not found")
+        }
+
+        log.info("check create time")
         if (session.createdAt.plusSeconds(604800L).isBefore(LocalDateTime.now())) {
             sessionRepo.delete(session)
             throw NotAuthorizedException("Not Logged In")

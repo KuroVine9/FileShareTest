@@ -6,11 +6,13 @@ import com.kuro9.fileshare.exception.NotAuthorizedException
 import com.kuro9.fileshare.service.SessionService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.core.MethodParameter
+import org.springframework.stereotype.Component
 import org.springframework.web.bind.support.WebDataBinderFactory
 import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
+@Component
 class GetSessionResolver(
     private val sessionService: SessionService
 ) : HandlerMethodArgumentResolver {
@@ -25,7 +27,8 @@ class GetSessionResolver(
         binderFactory: WebDataBinderFactory?
     ): Any {
         val request = webRequest.nativeRequest as HttpServletRequest
-        return request.getHeader("Authorization")?.let {
+        val headerVal = request.cookies?.find { it.name == "auth_code" }?.name
+        return headerVal?.let {
             sessionService.getSession(it)
         } ?: throw NotAuthorizedException("Authorization Header is empty")
     }

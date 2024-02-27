@@ -9,14 +9,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
-    environment:
-      - REQUEST_URL_DEV=http://localhost:8080/oauth/token
-      - CLIENT_ID=client
-      - CLIENT_SECRET=secret
-      - GRANT_TYPE=password
-      - SCOPE=read
     networks:
-      default:
+      - my-bridge-network
   redis:
     image: redis:alpine
     command: redis-server --port 6379
@@ -27,6 +21,8 @@ services:
       - "mode=standalone"
     ports:
       - "6379:6379"
+    networks:
+      - my-bridge-network
   mysql:
     image: mysql:8.3
     container_name: rdbms_mysql
@@ -40,4 +36,7 @@ services:
     volumes:
       - ./mysql:/var/lib/mysql
     networks:
-      default:
+      - my-bridge-network
+networks:
+  my-bridge-network:
+    driver: bridge
