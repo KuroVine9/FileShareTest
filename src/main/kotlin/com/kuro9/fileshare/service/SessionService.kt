@@ -24,7 +24,7 @@ class SessionService(
         val discordUserInfo =
             oAuth.getUserInfo(authResult.access_token) ?: throw TokenNotValidException("Token is not valid")
 
-        return sessionRepo.save(sessionMapper(authResult, discordUserInfo))
+        return sessionRepo.save(toSession(authResult, discordUserInfo))
     }
 
 
@@ -41,12 +41,10 @@ class SessionService(
         return session
     }
 
-    fun sessionMapper(authResult: OAuthResultVo, discordUserInfo: DiscordUserVo): Session = Session(
-        sessionId = UUID.randomUUID().toString(),
+    fun toSession(authResult: OAuthResultVo, discordUserInfo: DiscordUserVo): Session = Session(
         token = authResult.access_token,
         discordId = discordUserInfo.id,
         username = discordUserInfo.username,
         discriminator = discordUserInfo.discriminator,
-        createdAt = LocalDateTime.now()
     )
 }
