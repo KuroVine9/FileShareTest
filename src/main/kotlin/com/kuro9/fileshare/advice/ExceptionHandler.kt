@@ -1,5 +1,7 @@
 package com.kuro9.fileshare.advice
 
+import com.kuro9.fileshare.service.WebhookService
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -8,7 +10,9 @@ import org.springframework.web.servlet.ModelAndView
 import java.io.IOException
 
 @ControllerAdvice
-class ExceptionHandler {
+class ExceptionHandler(
+    private val webhookService: WebhookService
+) {
     @ExceptionHandler(IllegalArgumentException::class)
     fun http400(e: IllegalArgumentException): ModelAndView {
         val modelAndView = ModelAndView("error/StandardErrorPage").apply {
@@ -29,8 +33,9 @@ class ExceptionHandler {
         return modelAndView
     }
 
-    @ExceptionHandler(Exception::class)
-    fun unknownException(e: Exception): ResponseEntity<Any> {
+    @ExceptionHandler(Throwable::class)
+    fun unknownException(e: Throwable, request: HttpServletRequest): ResponseEntity<Any> {
+        webhookService.sendWebhook(e, request)
         return ResponseEntity.internalServerError().build()
     }
 }
