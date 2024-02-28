@@ -27,7 +27,7 @@ class GetSessionResolver(
         binderFactory: WebDataBinderFactory?
     ): Any {
         val request = webRequest.nativeRequest as HttpServletRequest
-        val headerVal = request.cookies?.find { it.name == "auth_code" }?.name
+        val headerVal = request.cookies?.find { it.name == "auth_code" }?.value
         return headerVal?.let {
             sessionService.getSession(it)
         } ?: throw NotAuthorizedException("Authorization Header is empty")

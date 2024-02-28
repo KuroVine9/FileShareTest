@@ -6,10 +6,10 @@ import jakarta.persistence.Id
 import org.hibernate.annotations.GenericGenerator
 import org.springframework.data.annotation.CreatedDate
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Entity
-class Session (
+class Session(
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "org.hibernate.id.UUIDGenerator")
     @Id val sessionId: String,
@@ -35,4 +35,8 @@ class Session (
         discriminator,
         LocalDateTime.now()
     )
+
+    override fun toString(): String {
+        return "Session(sessionId='$sessionId', token='$token', discordId='$discordId', username='$username', discriminator='$discriminator', createdAt=$createdAt)"
+    }
 }
