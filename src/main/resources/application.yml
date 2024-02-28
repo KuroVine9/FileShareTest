@@ -10,7 +10,7 @@ spring:
       port: 6379
 
   datasource:
-    url: jdbc:mysql://localhost:3306/file_share
+    url: jdbc:mysql://host.docker.internal:3306/file_share
     username: testuser
     password: verysupersecret
 
