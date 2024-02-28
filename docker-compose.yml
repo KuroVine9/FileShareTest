@@ -26,6 +26,8 @@ services:
     networks:
       - my-bridge-network
       - default
+    expose:
+      - "6379"
   mysql:
     image: mysql:8.3
     container_name: rdbms_mysql
@@ -41,7 +43,8 @@ services:
     networks:
       - my-bridge-network
       - default
-
+    expose:
+      - "3306"
 
 networks:
   my-bridge-network:
