@@ -33,4 +33,7 @@ app:
     client-secret: ${CLIENT_SECRET}
     grant-type: ${GRANT_TYPE}
     redirect-uri: http://localhost:3000/oauth/redirect
-    scope: ${SCOPE} 
+    scope: ${SCOPE}
+  webhook:
+    end-points:
+      - ${WEBHOOK_ENDPOINT}

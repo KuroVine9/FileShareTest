@@ -6,7 +6,8 @@ import java.net.URLEncoder
 @ConfigurationProperties(prefix = "app")
 data class AppConfig(
     val general: GeneralConfig,
-    val oauth: OAuthConfig
+    val oauth: OAuthConfig,
+    val webhook: WebhookConfig
 ) {
     data class OAuthConfig(
         val clientId: String,
@@ -25,5 +26,9 @@ data class AppConfig(
 
     data class GeneralConfig(
         val domain: String
+    )
+
+    data class WebhookConfig(
+        val endPoints: List<String>
     )
 }

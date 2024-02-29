@@ -2,6 +2,7 @@ package com.kuro9.fileshare.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.kuro9.fileshare.config.AppConfig
 import com.kuro9.fileshare.repository.WebhookRepository
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
@@ -11,15 +12,15 @@ import org.springframework.web.client.RestTemplate
 
 @Service
 class WebhookService(
-    private val webhookRepo: WebhookRepository
+    private val appConfig: AppConfig,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
     fun sendWebhook(e: Throwable, request: HttpServletRequest) {
         runCatching {
             val jsonString = toJsonString(e, request)
             logger.info(jsonString)
-            webhookRepo.findAll().forEach {
-                val req = RequestEntity.post(it.endpoint)
+            appConfig.webhook.endPoints.forEach {
+                val req = RequestEntity.post(it)
                     .header("Content-Type", "application/json")
                     .body(jsonString)
 
