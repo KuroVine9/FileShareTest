@@ -15,8 +15,8 @@ spring:
     password: verysupersecret
 
   jpa:
-    #    hibernate:
-    #      ddl-auto: create
+    hibernate:
+      ddl-auto: create
     show-sql: true
 
 
@@ -36,4 +36,4 @@ app:
     scope: ${SCOPE}
   webhook:
     end-points:
-      - ${WEBHOOK_ENDPOINT}
+      - ${ERROR_WEBHOOK}
