@@ -37,7 +37,7 @@ services:
       MYSQL_USER: testuser
       MYSQL_PASSWORD: verysupersecret
     ports:
-      - "${MYSQL_PORT}:3306"
+      - "3306:3306"
     volumes:
       - ./mysql:/var/lib/mysql
     networks:
