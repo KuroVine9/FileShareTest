@@ -6,6 +6,9 @@ import com.kuro9.fileshare.entity.Session
 import com.kuro9.fileshare.service.FileManageService
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
+import org.springframework.core.io.UrlResource
+import org.springframework.http.ContentDisposition
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
@@ -82,6 +85,24 @@ class UserDirectoryController(
         fileService.saveFile(toUpload, user)
 
         return ResponseEntity.ok("OK")
+    }
+
+    @GetMapping("download")
+    @ResponseBody
+    fun downloadFile(
+        @GetSession user: Session,
+        @RequestParam("path") path: String
+    ): ResponseEntity<*> {
+        if(!fileService.isUserAccessible(StringUtils.cleanPath(path), user))
+            return ResponseEntity<Any>(HttpStatus.FORBIDDEN)
+        val fileInfo = fileService.getFile(path) ?: return ResponseEntity<Any>(HttpStatus.NOT_FOUND)
+        val file = File(rootPath, fileInfo.fullPath)
+        if(!file.exists()) return ResponseEntity<Any>(HttpStatus.NOT_FOUND)
+        val resource = UrlResource("file:${file.canonicalPath}")
+        val header = HttpHeaders().apply {
+            contentDisposition = ContentDisposition.builder("attachment").filename(fileInfo.fileName).build()
+        }
+        return ResponseEntity(resource, header, HttpStatus.OK)
     }
 
 
