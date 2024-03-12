@@ -19,6 +19,7 @@ class OAuthApiService(val appConfig: AppConfig) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     fun getToken(code: String): OAuthResultVo? {
+        logger.info("redirectUrl={}", appConfig.oauth.redirectUri)
         return WebClient.create("https://discord.com/api/oauth2/token")
             .method(HttpMethod.POST)
             .header("Content-Type", "application/x-www-form-urlencoded")

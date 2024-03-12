@@ -16,12 +16,16 @@ data class AppConfig(
         val redirectUri: String,
         val scope: String
     ) {
+        private var _requestUri: String? = null
         val requestUri: String
-            get() = "https://discord.com/api/oauth2/authorize?client_id=$clientId&redirect_uri=${
-                URLEncoder.encode(
-                    redirectUri, "UTF-8"
-                )
-            }&response_type=code&scope=$scope"
+            get() =
+                _requestUri ?: "https://discord.com/api/oauth2/authorize?client_id=$clientId&redirect_uri=${
+                    URLEncoder.encode(
+                        redirectUri, "UTF-8"
+                    )
+                }&response_type=code&scope=$scope".also { _requestUri = it }
+
+
     }
 
     data class GeneralConfig(

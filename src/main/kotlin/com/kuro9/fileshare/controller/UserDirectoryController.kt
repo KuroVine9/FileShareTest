@@ -3,6 +3,7 @@ package com.kuro9.fileshare.controller
 import com.kuro9.fileshare.annotation.GetSession
 import com.kuro9.fileshare.dataclass.FileObj
 import com.kuro9.fileshare.entity.Session
+import com.kuro9.fileshare.exception.NotAuthorizedException
 import com.kuro9.fileshare.service.FileManageService
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
@@ -13,11 +14,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.util.StringUtils
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseBody
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 import java.io.File
@@ -44,13 +41,13 @@ class UserDirectoryController(
             logger.info("not exist user home")
             userHome.mkdir()
 
-            return page.addObject("fileList", emptyList<FileObj>())
+            return page.addObject("fileInfoList", emptyList<FileObj>())
         }
 
         var pathStr = StringUtils.cleanPath(path)
         if (!pathStr.startsWith("/")) pathStr = "/$pathStr"
         val fileList = fileService.getFileList("/$userId$pathStr")
-        page.addObject("fileList", fileList)
+        page.addObject("fileInfoList", fileList)
 
         return page
     }

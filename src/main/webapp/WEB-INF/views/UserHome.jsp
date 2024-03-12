@@ -16,7 +16,7 @@
         <td>Name</td>
         <td>Size</td>
     </tr>
-    <c:forEach var="file" items="${fileList}">
+    <c:forEach var="file" items="${fileInfoList}">
         <tr>
             <c:choose>
                 <c:when test="${file.dir}">
@@ -35,7 +35,7 @@
         </tr>
     </c:forEach>
 </table>
-<c:if test="${fileList.size() == 0}">
+<c:if test="${fileInfoList.size() == 0}">
     <p>빈 디렉토리</p>
 </c:if>
 
