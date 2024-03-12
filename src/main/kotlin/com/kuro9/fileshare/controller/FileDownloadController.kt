@@ -4,7 +4,6 @@ import com.kuro9.fileshare.annotation.GetSession
 import com.kuro9.fileshare.dataclass.FileObj
 import com.kuro9.fileshare.entity.Session
 import com.kuro9.fileshare.exception.NotAuthorizedException
-import com.kuro9.fileshare.service.OAuthApiService
 import jakarta.servlet.http.HttpServletResponse
 import lombok.RequiredArgsConstructor
 import org.slf4j.Logger
@@ -24,9 +23,7 @@ import java.io.FileInputStream
 @Controller
 @RequestMapping("share/")
 @RequiredArgsConstructor
-class FileDownloadController(
-    val oAuthApiService: OAuthApiService
-) {
+class FileDownloadController {
 
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
     private val shareFolderPath = System.getProperty("user.home") + "/Share"
