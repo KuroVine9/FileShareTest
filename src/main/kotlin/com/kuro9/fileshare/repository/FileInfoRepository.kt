@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface FileInfoRepository : JpaRepository<FileInfo, String> {
+    fun findAllByParentPath(parentPath: String): List<FileInfo>
+    fun existsByFullPath(fullPath: String): Boolean
 }

@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootWar
 
 plugins {
     war
@@ -59,4 +60,11 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.withType<BootWar> {
+//    manifest {
+//        attributes["Main-Class"] = "com.kuro9.fileshare.FileShareApplicationKt"
+//    }
+    enabled = true
 }
