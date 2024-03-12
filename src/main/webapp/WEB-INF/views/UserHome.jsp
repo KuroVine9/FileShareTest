@@ -21,15 +21,15 @@
             <c:choose>
                 <c:when test="${file.dir}">
                     <td>Dir</td>
-                    <td><a href="">${file.fileName}</a></td>
-                    <td>${file.size} B</td>
+                    <td><a href="">${file.name}</a></td>
+                    <td>${file.sizeStr}</td>
                 </c:when>
                 <c:otherwise>
                     <td>File</td>
                     <td>
-                        <a href="">${file.fileName}</a>
+                        <a href="">${file.name}</a>
                     </td>
-                    <td>${file.size} B</td>
+                    <td>${file.sizeStr}</td>
                 </c:otherwise>
             </c:choose>
         </tr>
@@ -40,8 +40,8 @@
 </c:if>
 
 <div id="pageControl">
-    <button onclick="location.href='/share/files'">
-        루트 디렉토리
+    <button onclick="location.href='/files/user'">
+        /
     </button>
     <%
         String directory = request.getParameter("dir");
@@ -50,7 +50,7 @@
         int slashIdx = directory.lastIndexOf("/");
         if (slashIdx == -1) return;
         String parent = directory.substring(0, slashIdx);
-
+        //TODO
         out.println("<button onclick=\"location.href='/share/files?dir=" + parent + "'\"> 상위 디렉토리 </button>");
     %>
 </div>

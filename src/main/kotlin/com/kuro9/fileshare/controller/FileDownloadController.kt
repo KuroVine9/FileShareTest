@@ -1,9 +1,10 @@
 package com.kuro9.fileshare.controller
 
 import com.kuro9.fileshare.annotation.GetSession
-import com.kuro9.fileshare.dataclass.FileObj
 import com.kuro9.fileshare.entity.Session
+import com.kuro9.fileshare.entity.vo.FileObj
 import com.kuro9.fileshare.exception.NotAuthorizedException
+import com.kuro9.fileshare.utils.humanReadableByteCountSI
 import jakarta.servlet.http.HttpServletResponse
 import lombok.RequiredArgsConstructor
 import org.slf4j.Logger
@@ -18,6 +19,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import org.springframework.web.servlet.ModelAndView
 import java.io.File
 import java.io.FileInputStream
+import java.time.LocalDateTime
 
 
 @Controller
@@ -46,7 +48,9 @@ class FileDownloadController {
                 FileObj(
                     it.name,
                     it.length(),
-                    it.isDirectory
+                    humanReadableByteCountSI(it.length()),
+                    it.isDirectory,
+                    LocalDateTime.now()
                 )
             } ?: emptyList()
         page.addObject("fileList", fileList)
