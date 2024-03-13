@@ -1,12 +1,14 @@
 package com.kuro9.fileshare.controller
 
 import com.kuro9.fileshare.annotation.GetSession
-import com.kuro9.fileshare.entity.FileInfo
+import com.kuro9.fileshare.config.AppConfig
 import com.kuro9.fileshare.entity.Session
 import com.kuro9.fileshare.entity.vo.FileObj
 import com.kuro9.fileshare.service.FileManageService
+import jakarta.annotation.PostConstruct
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
+import org.springframework.boot.SpringApplication
 import org.springframework.core.io.UrlResource
 import org.springframework.http.ContentDisposition
 import org.springframework.http.HttpHeaders
@@ -18,14 +20,32 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.ModelAndView
 import java.io.File
+import kotlin.system.exitProcess
 
 @Controller
 @RequestMapping("files/user")
 class UserDirectoryController(
-    private val fileService: FileManageService
+    private val fileService: FileManageService,
+    private val appConfig: AppConfig,
+    private val context: org.springframework.context.ApplicationContext
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
-    private val rootPath = System.getProperty("user.home") + "/Share"
+    private val rootPath = appConfig.general.shareFolderPath + "/Share"
+
+    @PostConstruct
+    fun checkRootPath() {
+        val root = File(appConfig.general.shareFolderPath)
+        if (!root.exists()) {
+            logger.error("{} is not exist path,", appConfig.general.shareFolderPath)
+            exitProcess(SpringApplication.exit(context))
+        }
+
+        val share = File(rootPath)
+        if (!share.exists()) {
+            logger.info("Maybe First Run or Share folder deleted? creating /Share...")
+            share.mkdir()
+        }
+    }
 
     @GetMapping
     @Transactional
@@ -33,7 +53,7 @@ class UserDirectoryController(
         @GetSession user: Session,
         @RequestParam(required = false, defaultValue = "/") path: String
     ): ModelAndView {
-        val page = ModelAndView("userHome").apply {
+        val page = ModelAndView("UserHome").apply {
             addObject("userName", user.username)
         }
 
@@ -54,9 +74,9 @@ class UserDirectoryController(
 
         return page
     }
- 
+
     /**
-     * ex)userId = 112233
+     * ex: userId = 112233
      * path := /path/to/upload
      * file -> fileName = "test.jpg"
      * fullPath = /112233/path/to/upload/test.jpg
