@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 
 data class FileObj(
     val name: String,
+    val fullPath: String,
     val size: Long,
     val sizeStr: String,
     val isDir: Boolean,
@@ -15,6 +16,7 @@ data class FileObj(
         fun toFileObj(fileInfo: FileInfo): FileObj {
             return FileObj(
                 fileInfo.fileName,
+                fileInfo.fullPath,
                 fileInfo.fileSize,
                 humanReadableByteCountSI(fileInfo.fileSize),
                 fileInfo.isDir,

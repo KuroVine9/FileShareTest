@@ -53,8 +53,13 @@ class UserDirectoryController(
         @GetSession user: Session,
         @RequestParam(required = false, defaultValue = "/") path: String
     ): ModelAndView {
+        var pathStr = StringUtils.cleanPath(path)
+        if (path.contains("..")) pathStr = "/"
+        if (!pathStr.startsWith("/")) pathStr = "/$pathStr"
+
         val page = ModelAndView("UserHome").apply {
             addObject("userName", user.username)
+            addObject("nowPath", pathStr)
         }
 
         val userId = user.discordId
@@ -67,8 +72,6 @@ class UserDirectoryController(
             return page.addObject("fileInfoList", emptyList<FileObj>())
         }
 
-        var pathStr = StringUtils.cleanPath(path)
-        if (!pathStr.startsWith("/")) pathStr = "/$pathStr"
         val fileList = fileService.getFileList("/$userId$pathStr")
         page.addObject("fileInfoList", fileList.map { FileObj.toFileObj(it) })
 
@@ -81,14 +84,16 @@ class UserDirectoryController(
      * file -> fileName = "test.jpg"
      * fullPath = /112233/path/to/upload/test.jpg
      */
-    @PutMapping("upload")
+    @PostMapping("upload")
     @ResponseBody
     @Transactional
     fun uploadFile(
         @GetSession user: Session,
         @RequestParam("path") path: String,
-        @RequestParam("file") file: MultipartFile
+        @RequestParam("payload") file: MultipartFile?
     ): ResponseEntity<*> {
+        if (file == null) return ResponseEntity<String>("PARAM_ERR", HttpStatus.BAD_REQUEST)
+
         val fileName = file.name
         logger.info("fileName={} fileOrigName={}", file.name, file.originalFilename)
         val nameReg = Regex("^[A-Za-z0-9\\-_+=\\[\\]]{1,64}$")
@@ -131,10 +136,8 @@ class UserDirectoryController(
 
 
     private fun pathCheck(path: String): Boolean {
-        if (!path.startsWith("/")) return false
-        if (!path.endsWith("/")) return false
         if (path.contains("..")) return false
-        val nameReg = Regex("""^[A-Za-z0-9\-_+=]{1,20}""")
-        return path.split("/").all { nameReg.matches(it) }
+        val nameReg = Regex("^[A-Za-z0-9\\-_+=\\[\\]]{1,64}$")
+        return path.split("/").filter { it.isNotEmpty() }.all { nameReg.matches(it) }
     }
 }
