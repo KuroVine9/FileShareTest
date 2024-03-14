@@ -25,7 +25,7 @@ class FileManageService(
     }
 
     fun isFileExist(parentPath: String, fileName: String): Boolean {
-        return fileInfo.existsByFullPath("$parentPath/$fileName");
+        return fileInfo.existsByFullPath("$parentPath/$fileName")
     }
 
     fun isFileExist(fullPath: String): Boolean {
@@ -37,13 +37,25 @@ class FileManageService(
         fileInfo.save(FileInfo.toFileInfo(file, user.discordId))
     }
 
-    fun isUserAccessible(path: String, user: Session): Boolean {
+    /**
+     * 유저 접근권한 확인
+     * @param type : 테스트 권한. [FileAuth.Type.NONE]은 허용하지 않음
+     */
+    fun checkUserAccessibility(path: String, user: Session, type: FileAuth.Type): Boolean {
+        if (type == FileAuth.Type.NONE) throw IllegalArgumentException("Type.NONE is not allowed in this method")
         val fileInfo = fileInfo.findById(path)
-        if(fileInfo.isEmpty) return false
-        if(fileInfo.get().ownerId == user.discordId) return true
+        // TODO 폴더의 접근권한을 어떻게 할지 생각해 보아야 함. 현재는 루트 폴더가 db에 정보가 없어 무조건 false 리턴
+        if (fileInfo.isEmpty) return false // 파일이 없다면 false
+        if (fileInfo.get().ownerId == user.discordId) return true   // 파일의 owner라면 true
 
         val result = fileAuth.findById(FileAuthId(path, user.discordId))
-        if(result.isEmpty) return false
-        return result.get().type == FileAuth.Type.INCLUDE
+        if (result.isEmpty) return false
+        val resultType = result.get().type
+        return when (type) {
+            FileAuth.Type.READ -> resultType.isReadable()
+            FileAuth.Type.WRITE -> resultType.isWritable()
+            FileAuth.Type.RW -> resultType.isFullAccess()
+            else -> throw IllegalArgumentException("Type.NONE is not allowed in this method")
+        }
     }
 }

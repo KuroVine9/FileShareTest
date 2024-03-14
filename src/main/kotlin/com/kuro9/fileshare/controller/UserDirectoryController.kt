@@ -2,8 +2,10 @@ package com.kuro9.fileshare.controller
 
 import com.kuro9.fileshare.annotation.GetSession
 import com.kuro9.fileshare.config.AppConfig
+import com.kuro9.fileshare.entity.FileAuth
 import com.kuro9.fileshare.entity.Session
 import com.kuro9.fileshare.entity.vo.FileObj
+import com.kuro9.fileshare.entity.vo.MkdirRequest
 import com.kuro9.fileshare.service.FileManageService
 import jakarta.annotation.PostConstruct
 import jakarta.transaction.Transactional
@@ -124,7 +126,7 @@ class UserDirectoryController(
         @GetSession user: Session,
         @RequestParam("path") path: String
     ): ResponseEntity<*> {
-        if (!fileService.isUserAccessible(StringUtils.cleanPath(path), user))
+        if (!fileService.checkUserAccessibility(StringUtils.cleanPath(path), user, FileAuth.Type.READ))
             return ResponseEntity<Any>(HttpStatus.FORBIDDEN)
         val fileInfo = fileService.getFile(path) ?: return ResponseEntity<Any>(HttpStatus.NOT_FOUND)
         val file = File(rootPath, fileInfo.fullPath)
@@ -134,6 +136,18 @@ class UserDirectoryController(
             contentDisposition = ContentDisposition.builder("attachment").filename(fileInfo.fileName).build()
         }
         return ResponseEntity(resource, header, HttpStatus.OK)
+    }
+
+    @PostMapping("mkdir")
+    @ResponseBody
+    fun mkdir(
+        @GetSession user: Session,
+        @RequestBody body: MkdirRequest
+    ): ResponseEntity<String> {
+        if (!fileService.checkUserAccessibility(StringUtils.cleanPath(body.path), user, FileAuth.Type.WRITE))
+            return ResponseEntity(HttpStatus.FORBIDDEN)
+
+        // TODO
     }
 
 

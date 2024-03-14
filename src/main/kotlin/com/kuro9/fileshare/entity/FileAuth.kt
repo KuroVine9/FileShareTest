@@ -1,27 +1,27 @@
 package com.kuro9.fileshare.entity
 
-import jakarta.persistence.AttributeConverter
-import jakarta.persistence.Converter
-import jakarta.persistence.Embeddable
-import jakarta.persistence.EmbeddedId
-import jakarta.persistence.Entity
+import jakarta.persistence.*
 import org.springframework.data.annotation.CreatedDate
 import java.io.Serializable
 import java.time.LocalDateTime
 
 @Entity
-class FileAuth (
+class FileAuth(
     @EmbeddedId val id: FileAuthId,
     val type: Type,
     @CreatedDate val createdAt: LocalDateTime
 ) {
     enum class Type(val value: Int) {
-        INCLUDE(1), EXCLUDE(2)
+        READ(1), WRITE(2), RW(3), NONE(0);
+
+        fun isReadable() = this in listOf(READ, RW)
+        fun isWritable() = this in listOf(WRITE, RW)
+        fun isFullAccess() = this == RW
     }
 }
 
 @Embeddable
-data class FileAuthId (
+data class FileAuthId(
     val filePath: String,
     val userId: String
 ) : Serializable
