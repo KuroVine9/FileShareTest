@@ -56,6 +56,7 @@ class UserDirectoryController(
         var pathStr = StringUtils.cleanPath(path)
         if (path.contains("..")) pathStr = "/"
         if (!pathStr.startsWith("/")) pathStr = "/$pathStr"
+        if (pathStr.endsWith("/")) pathStr = pathStr.dropLast(1)
 
         val page = ModelAndView("UserHome").apply {
             addObject("userName", user.username)
@@ -94,9 +95,10 @@ class UserDirectoryController(
     ): ResponseEntity<*> {
         if (file == null) return ResponseEntity<String>("PARAM_ERR", HttpStatus.BAD_REQUEST)
 
-        val fileName = file.name
+        var fileName = file.originalFilename ?: return ResponseEntity<String>("FILE_NAME_ERR", HttpStatus.BAD_REQUEST)
+        if (fileName.contains("/")) fileName = fileName.split("/").last()
         logger.info("fileName={} fileOrigName={}", file.name, file.originalFilename)
-        val nameReg = Regex("^[A-Za-z0-9\\-_+=\\[\\]]{1,64}$")
+        val nameReg = Regex("^[A-Za-z0-9\\-_+=\\[\\]\\s.]{1,64}$")
         val matchResult = nameReg.matches(fileName)
         if (!matchResult) return ResponseEntity<String>("FILENAME_ERR", HttpStatus.BAD_REQUEST)
 
@@ -105,10 +107,10 @@ class UserDirectoryController(
         //TODO 용량체크
 
         if (file.isEmpty) return ResponseEntity<String>("FILE_EMPTY_ERR", HttpStatus.BAD_REQUEST)
-        if (fileService.isFileExist("/${user.discordId}$path", file.name)) {
+        if (fileService.isFileExist("/${user.discordId}$path", fileName)) {
             return ResponseEntity<String>("DUP_FILE_ERR", HttpStatus.CONFLICT)
         }
-        val toUpload = File("$rootPath/${user.discordId}$path", file.name)
+        val toUpload = File("$rootPath/${user.discordId}$path", fileName)
         if (!toUpload.parentFile.exists()) return ResponseEntity<String>("PARENT_NOT_EXIST_ERR", HttpStatus.FORBIDDEN)
         file.transferTo(toUpload)
         fileService.saveFile(toUpload, user)
