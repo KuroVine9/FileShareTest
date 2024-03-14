@@ -147,13 +147,23 @@ class UserDirectoryController(
         if (!fileService.checkUserAccessibility(StringUtils.cleanPath(body.path), user, FileAuth.Type.WRITE))
             return ResponseEntity(HttpStatus.FORBIDDEN)
 
+        if (!pathCheck(body.path) || !nameCheck(body.dirName)) return ResponseEntity(HttpStatus.BAD_REQUEST)
         // TODO
+        val file = File(rootPath, body.path)
+        if (!file.exists()) return ResponseEntity(HttpStatus.NOT_FOUND)
+
     }
 
 
     private fun pathCheck(path: String): Boolean {
-        if (path.contains("..")) return false
-        val nameReg = Regex("^[A-Za-z0-9\\-_+=\\[\\]]{1,64}$")
-        return path.split("/").filter { it.isNotEmpty() }.all { nameReg.matches(it) }
+        if (path.contains("..") || path.contains("//")) return false
+        val safePath = StringUtils.cleanPath(path)
+        return safePath.split("/").filter { it.isNotEmpty() }.all { nameCheck(it) }
+    }
+
+    private fun nameCheck(name: String): Boolean {
+        if (name.contains("..") || name.contains("/")) return false
+        val nameReg = Regex("^[A-Za-z0-9\\-_+=\\[\\]\\s.]{1,64}$")
+        return nameReg.matches(name)
     }
 }
