@@ -70,6 +70,15 @@
         </div>
         <input type="submit">
     </form>
+    <form method="post" action="<c:url value="/files/user/mkdir"/>" enctype="text/plain">
+        <div>
+            새 폴더 이름 : <input type="text" name="dirName" id="newDirName">
+        </div>
+        <div hidden="hidden">
+            <input type="text" value="${nowPath}" hidden="hidden">
+        </div>
+        <input type="submit">
+    </form>
 </div>
 
 </body>
