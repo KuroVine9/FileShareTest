@@ -1,9 +1,9 @@
 package com.kuro9.fileshare.entity
 
+import com.kuro9.fileshare.utils.toDbPath
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import org.springframework.data.annotation.CreatedDate
-import org.springframework.util.StringUtils
 import java.io.File
 import java.time.LocalDateTime
 
@@ -19,7 +19,7 @@ class FileInfo(
 ) {
     companion object {
         fun toFileInfo(file: File, ownerId: String): FileInfo {
-            val fullPath = StringUtils.cleanPath(file.canonicalPath).split("Share")[1]
+            val fullPath = toDbPath(file)
             val parentPath = fullPath.substring(0 until fullPath.indexOfLast { it == '/' })
             val fileName = file.name
             val fileSize = file.length()

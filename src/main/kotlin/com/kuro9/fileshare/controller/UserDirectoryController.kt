@@ -7,6 +7,8 @@ import com.kuro9.fileshare.entity.Session
 import com.kuro9.fileshare.entity.vo.FileObj
 import com.kuro9.fileshare.entity.vo.MkdirRequest
 import com.kuro9.fileshare.service.FileManageService
+import com.kuro9.fileshare.utils.nameCheck
+import com.kuro9.fileshare.utils.pathCheck
 import jakarta.annotation.PostConstruct
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
@@ -53,11 +55,11 @@ class UserDirectoryController(
     @Transactional
     fun userPage(
         @GetSession user: Session,
-        @RequestParam(required = false, defaultValue = "/") path: String
+        @RequestParam(required = false) path: String?
     ): ModelAndView {
-        var pathStr = StringUtils.cleanPath(path)
-        if (path.contains("..")) pathStr = "/"
-        if (!pathStr.startsWith("/")) pathStr = "/$pathStr"
+        var pathStr = StringUtils.cleanPath(path ?: "/${user.discordId}")
+        if (pathStr.contains("..")) pathStr = "/${user.discordId}"
+        if (!pathStr.startsWith("/")) pathStr = "/${user.discordId}"
         if (pathStr.endsWith("/")) pathStr = pathStr.dropLast(1)
 
         val page = ModelAndView("UserHome").apply {
@@ -71,11 +73,12 @@ class UserDirectoryController(
         if (!userHome.exists()) {
             logger.info("not exist user home")
             userHome.mkdir()
+            fileService.saveFile(userHome, user)
 
             return page.addObject("fileInfoList", emptyList<FileObj>())
         }
 
-        val fileList = fileService.getFileList("/$userId$pathStr")
+        val fileList = fileService.getFileList(pathStr)
         page.addObject("fileInfoList", fileList.map { FileObj.toFileObj(it) })
 
         return page
@@ -89,30 +92,29 @@ class UserDirectoryController(
      */
     @PostMapping("upload")
     @ResponseBody
-    @Transactional
+    @Transactional(rollbackOn = [Exception::class])
     fun uploadFile(
         @GetSession user: Session,
         @RequestParam("path") path: String,
         @RequestParam("payload") file: MultipartFile?
-    ): ResponseEntity<*> {
+    ): ResponseEntity<String> {
         if (file == null) return ResponseEntity<String>("PARAM_ERR", HttpStatus.BAD_REQUEST)
 
         var fileName = file.originalFilename ?: return ResponseEntity<String>("FILE_NAME_ERR", HttpStatus.BAD_REQUEST)
         if (fileName.contains("/")) fileName = fileName.split("/").last()
         logger.info("fileName={} fileOrigName={}", file.name, file.originalFilename)
-        val nameReg = Regex("^[A-Za-z0-9\\-_+=\\[\\]\\s.]{1,64}$")
-        val matchResult = nameReg.matches(fileName)
-        if (!matchResult) return ResponseEntity<String>("FILENAME_ERR", HttpStatus.BAD_REQUEST)
-
+        if (!nameCheck(fileName)) return ResponseEntity<String>("FILENAME_ERR", HttpStatus.BAD_REQUEST)
         if (!pathCheck(path)) return ResponseEntity<String>("PATH_ERR", HttpStatus.BAD_REQUEST)
 
         //TODO 용량체크
+        if (!fileService.checkUserAccessibility(StringUtils.cleanPath(path), user, FileAuth.Type.WRITE))
+            return ResponseEntity("NO_PERMISSION", HttpStatus.FORBIDDEN)
 
         if (file.isEmpty) return ResponseEntity<String>("FILE_EMPTY_ERR", HttpStatus.BAD_REQUEST)
-        if (fileService.isFileExist("/${user.discordId}$path", fileName)) {
+        if (fileService.isFileExist(path, fileName)) {
             return ResponseEntity<String>("DUP_FILE_ERR", HttpStatus.CONFLICT)
         }
-        val toUpload = File("$rootPath/${user.discordId}$path", fileName)
+        val toUpload = File("$rootPath/$path", fileName)
         if (!toUpload.parentFile.exists()) return ResponseEntity<String>("PARENT_NOT_EXIST_ERR", HttpStatus.FORBIDDEN)
         file.transferTo(toUpload)
         fileService.saveFile(toUpload, user)
@@ -151,19 +153,15 @@ class UserDirectoryController(
         // TODO
         val file = File(rootPath, body.path)
         if (!file.exists()) return ResponseEntity(HttpStatus.NOT_FOUND)
+        val newDir = File(file.path, body.dirName)
+        if (newDir.exists()) return ResponseEntity(HttpStatus.CONFLICT)
+        kotlin.runCatching { newDir.mkdir() }.onFailure {
+            logger.error("exception on make dir", it)
+            return ResponseEntity(HttpStatus.CONFLICT)
+        }
 
-    }
+        fileService.saveFile(file, user)
 
-
-    private fun pathCheck(path: String): Boolean {
-        if (path.contains("..") || path.contains("//")) return false
-        val safePath = StringUtils.cleanPath(path)
-        return safePath.split("/").filter { it.isNotEmpty() }.all { nameCheck(it) }
-    }
-
-    private fun nameCheck(name: String): Boolean {
-        if (name.contains("..") || name.contains("/")) return false
-        val nameReg = Regex("^[A-Za-z0-9\\-_+=\\[\\]\\s.]{1,64}$")
-        return nameReg.matches(name)
+        return ResponseEntity.ok(null)
     }
 }
