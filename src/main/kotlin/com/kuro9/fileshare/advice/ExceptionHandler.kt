@@ -1,5 +1,6 @@
 package com.kuro9.fileshare.advice
 
+import com.kuro9.fileshare.exception.NotAuthorizedException
 import com.kuro9.fileshare.service.WebhookService
 import jakarta.servlet.http.HttpServletRequest
 import org.slf4j.LoggerFactory
@@ -43,4 +44,7 @@ class ExceptionHandler(
         if (e is Error) throw e
         return ResponseEntity.internalServerError().build()
     }
+
+    @ExceptionHandler(NotAuthorizedException::class)
+    fun notAuthorized(e: NotAuthorizedException) = ModelAndView("redirect:/oauth/login")
 }

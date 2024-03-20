@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     restart: always
     ports:
-      - "${SPRING_PORT}:3000"
+      - "3000:3000"
     networks:
       - my-bridge-network
       - default

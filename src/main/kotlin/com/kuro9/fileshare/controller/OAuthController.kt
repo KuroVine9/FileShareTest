@@ -1,7 +1,6 @@
 package com.kuro9.fileshare.controller
 
 import com.kuro9.fileshare.config.AppConfig
-import com.kuro9.fileshare.service.OAuthApiService
 import com.kuro9.fileshare.service.SessionService
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletResponse
@@ -22,7 +21,6 @@ import java.net.URI
 @RequestMapping("oauth")
 class OAuthController(
     val appConfig: AppConfig,
-    val oAuthApiService: OAuthApiService,
     val sessionService: SessionService
 ) {
     private val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -60,7 +58,7 @@ class OAuthController(
         cookie.secure = true
         response.addCookie(cookie)
         return mav.apply {
-            viewName = "redirect:/share/files"
+            viewName = "redirect:/"
         }
     }
 }
