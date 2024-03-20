@@ -40,11 +40,53 @@
             location.href = "/files/user?path=" + dirName;
         }
 
+        async function uploadFile() {
+            const payload = new FormData();
+            const fileInput = document.getElementById("uploadInput").files;
+            console.log(fileInput.length)
+            payload.append("payload", fileInput[0]);
+
+            console.table(payload)
+            const response = await fetch("/files/user/upload?path=${nowPath}", {
+                method: "POST",
+                // headers: {
+                //     "Content-Type": "multipart/form-data"
+                // },
+                body: payload
+            });
+            console.table(response)
+            switch (response.status) {
+                case 200:
+                    alert("OK");
+                    break;
+                case 400:
+                    alert(response.body);
+                    break;
+                case 403:
+                    alert("No Permission");
+                    break;
+                case 409:
+                    alert("Already Exist");
+                    break;
+                default:
+                    alert("Unknown Error: Code=" + response.status)
+                    break;
+            }
+            location.href = "/files/user?path=${nowPath}";
+
+        }
+
         function init() {
             const mkdirForm = document.getElementById("mkdir");
             mkdirForm.addEventListener("submit", function (e) {
                 e.preventDefault();
                 mkdirReq(document.getElementById("newDirName").value, "${nowPath}")
+            })
+
+            const uploadForm = document.getElementById("uploadForm");
+            uploadForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                uploadFile();
             })
         }
     </script>
@@ -107,7 +149,7 @@
 </div>
 
 <div id="fileTransferControl">
-    <form method="post" action="<c:url value="/files/user/upload?path=${nowPath}"/>" enctype="multipart/form-data">
+    <form method="post" id="uploadForm">
         <div>
             파일 업로드 : <input type="file" name="payload" id="uploadInput">
         </div>

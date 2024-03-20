@@ -96,7 +96,7 @@ class UserDirectoryController(
     fun uploadFile(
         @GetSession user: Session,
         @RequestParam("path") path: String,
-        @RequestParam("payload") file: MultipartFile?
+        @RequestParam(value = "payload", required = false) file: MultipartFile?
     ): ResponseEntity<String> {
         if (file == null) return ResponseEntity<String>("PARAM_ERR", HttpStatus.BAD_REQUEST)
 
