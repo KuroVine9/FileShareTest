@@ -142,9 +142,10 @@ class UserDirectoryController(
 
     @PostMapping("mkdir")
     @ResponseBody
+    @Transactional
     fun mkdir(
         @GetSession user: Session,
-        @RequestBody body: MkdirRequest
+        body: MkdirRequest
     ): ResponseEntity<String> {
         if (!fileService.checkUserAccessibility(StringUtils.cleanPath(body.path), user, FileAuth.Type.WRITE))
             return ResponseEntity(HttpStatus.FORBIDDEN)
@@ -154,13 +155,16 @@ class UserDirectoryController(
         val file = File(rootPath, body.path)
         if (!file.exists()) return ResponseEntity(HttpStatus.NOT_FOUND)
         val newDir = File(file.path, body.dirName)
+
         if (newDir.exists()) return ResponseEntity(HttpStatus.CONFLICT)
+
+
         kotlin.runCatching { newDir.mkdir() }.onFailure {
             logger.error("exception on make dir", it)
             return ResponseEntity(HttpStatus.CONFLICT)
         }
+        fileService.saveFile(newDir, user)
 
-        fileService.saveFile(file, user)
 
         return ResponseEntity.ok(null)
     }
