@@ -8,16 +8,33 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/file_share
+    username: testuser
+    password: verysupersecret
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+
+
+
+
 server:
   port: 3000
-  
+
 app:
   general:
-    domain: localhost
+    domain: ${DOMAIN}
+    share-folder-path: ${SHARE_FOLDER_PATH}
   oauth:
-    request-url: ${REQUST_URL_DEV}
     client-id: ${CLIENT_ID}
     client-secret: ${CLIENT_SECRET}
     grant-type: ${GRANT_TYPE}
-    redirect-uri: http://localhost:3000/share/files
-    scope: ${SCOPE} 
+    redirect-uri: ${REDIRECT_URI}
+    scope: ${SCOPE}
+  webhook:
+    end-points:
+      - ${ERROR_WEBHOOK}

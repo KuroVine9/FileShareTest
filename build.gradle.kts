@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootWar
 
 plugins {
     war
@@ -6,6 +7,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.4"
     kotlin("jvm") version "1.9.22"
     kotlin("plugin.spring") version "1.9.22"
+    kotlin("plugin.jpa") version "1.9.22"
 }
 
 group = "com.kuro9"
@@ -37,13 +39,16 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.projectlombok:lombok")
-    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
+//    providedRuntime("org.springframework.boot:spring-boot-starter-tomcat")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
 
     implementation("org.apache.tomcat.embed:tomcat-embed-jasper")
     implementation("org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.0")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
+
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("mysql:mysql-connector-java:8.0.32")
 }
 
 tasks.withType<KotlinCompile> {
@@ -55,4 +60,11 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.withType<BootWar> {
+//    manifest {
+//        attributes["Main-Class"] = "com.kuro9.fileshare.FileShareApplicationKt"
+//    }
+    enabled = true
 }

@@ -1,11 +1,10 @@
 package com.kuro9.fileshare.service
 
 import com.kuro9.fileshare.config.AppConfig
-import com.kuro9.fileshare.dataclass.DiscordUserVo
-import com.kuro9.fileshare.dataclass.OAuthResultVo
+import com.kuro9.fileshare.entity.json.DiscordUserVo
+import com.kuro9.fileshare.entity.json.OAuthResultVo
 import lombok.RequiredArgsConstructor
 import org.slf4j.LoggerFactory
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
@@ -20,6 +19,7 @@ class OAuthApiService(val appConfig: AppConfig) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     fun getToken(code: String): OAuthResultVo? {
+        logger.info("redirectUrl={}", appConfig.oauth.redirectUri)
         return WebClient.create("https://discord.com/api/oauth2/token")
             .method(HttpMethod.POST)
             .header("Content-Type", "application/x-www-form-urlencoded")
@@ -37,11 +37,6 @@ class OAuthApiService(val appConfig: AppConfig) {
 
     }
 
-    @Cacheable(
-        value = ["discord_user"],
-        key = "#token",
-        unless = "#result == null"
-    )
     fun getUserInfo(token: String): DiscordUserVo? {
         logger.info("token={}", token)
         return WebClient.create("https://discord.com/api/users/@me")

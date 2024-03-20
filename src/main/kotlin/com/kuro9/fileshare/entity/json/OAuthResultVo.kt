@@ -1,4 +1,4 @@
-package com.kuro9.fileshare.dataclass
+package com.kuro9.fileshare.entity.json
 
 import lombok.Data
 import org.springframework.data.annotation.Id

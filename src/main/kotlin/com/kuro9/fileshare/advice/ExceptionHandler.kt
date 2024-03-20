@@ -1,13 +1,21 @@
 package com.kuro9.fileshare.advice
 
+import com.kuro9.fileshare.exception.NotAuthorizedException
+import com.kuro9.fileshare.service.WebhookService
+import jakarta.servlet.http.HttpServletRequest
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.servlet.ModelAndView
 import java.io.IOException
 
 @ControllerAdvice
-class ExceptionHandler {
+class ExceptionHandler(
+    private val webhookService: WebhookService
+) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
     @ExceptionHandler(IllegalArgumentException::class)
     fun http400(e: IllegalArgumentException): ModelAndView {
         val modelAndView = ModelAndView("error/StandardErrorPage").apply {
@@ -27,4 +35,16 @@ class ExceptionHandler {
         }
         return modelAndView
     }
+
+    @ExceptionHandler(Throwable::class)
+    fun unknownException(e: Throwable, request: HttpServletRequest): ResponseEntity<Any> {
+        logger.error("Error Occurred: ", e)
+        webhookService.sendWebhook(e, request)
+        
+        if (e is Error) throw e
+        return ResponseEntity.internalServerError().build()
+    }
+
+    @ExceptionHandler(NotAuthorizedException::class)
+    fun notAuthorized(e: NotAuthorizedException) = ModelAndView("redirect:/oauth/login")
 }

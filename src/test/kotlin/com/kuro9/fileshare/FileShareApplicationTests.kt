@@ -1,5 +1,7 @@
 package com.kuro9.fileshare
 
+import com.kuro9.fileshare.entity.Session
+import com.kuro9.fileshare.repository.SessionRepository
 import com.kuro9.fileshare.service.OAuthApiService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -12,6 +14,9 @@ class FileShareApplicationTests {
 
     @Autowired
     lateinit var oAuthApiService: OAuthApiService
+
+    @Autowired
+    lateinit var sessionRepository: SessionRepository
 
     @Test
     fun tokenTest() {
@@ -28,4 +33,20 @@ class FileShareApplicationTests {
             .bodyToMono(Map::class.java)  // Map으로 역직렬화
             .block()
     }
+
+    @Test
+    fun jpaTest() {
+        sessionRepository.save(
+            Session("token", "discordId", "username", "discriminator")
+        )
+
+
+    }
+
+    @Test
+    fun jpaLoadTest() {
+        println(sessionRepository.findById("fa902abb-48ce-4cd1-abf7-0d925e609792"))
+    }
+
+
 }

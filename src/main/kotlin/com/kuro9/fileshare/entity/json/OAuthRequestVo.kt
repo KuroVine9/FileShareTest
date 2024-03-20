@@ -1,4 +1,4 @@
-package com.kuro9.fileshare.dataclass
+package com.kuro9.fileshare.entity.json
 
 data class OAuthRequestVo(
     val client_id: String,
