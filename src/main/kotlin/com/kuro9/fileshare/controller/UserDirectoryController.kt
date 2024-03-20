@@ -145,7 +145,7 @@ class UserDirectoryController(
     @Transactional
     fun mkdir(
         @GetSession user: Session,
-        body: MkdirRequest
+        @RequestBody body: MkdirRequest
     ): ResponseEntity<String> {
         if (!fileService.checkUserAccessibility(StringUtils.cleanPath(body.path), user, FileAuth.Type.WRITE))
             return ResponseEntity(HttpStatus.FORBIDDEN)

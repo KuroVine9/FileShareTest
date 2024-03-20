@@ -5,8 +5,51 @@
 <head>
     <meta charset="UTF-8">
     <title>파일 다운로드</title>
+    <script>
+        async function mkdirReq(dirName, path) {
+            const reqBody = {
+                "dirName": dirName,
+                "path": path
+            }
+            console.table(reqBody)
+            const response = await fetch("/files/user/mkdir", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(reqBody)
+            });
+
+            switch (response.status) {
+                case 200:
+                    alert("OK");
+                    break;
+                case 400:
+                    alert("not valid name");
+                    break;
+                case 403:
+                    alert("No Permission");
+                    break;
+                case 409:
+                    alert("Already Exist");
+                    break;
+                default:
+                    alert("Unknown Error: Code=" + response.status)
+                    break;
+            }
+            location.href = "/files/user?path=" + dirName;
+        }
+
+        function init() {
+            const mkdirForm = document.getElementById("mkdir");
+            mkdirForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                mkdirReq(document.getElementById("newDirName").value, "${nowPath}")
+            })
+        }
+    </script>
 </head>
-<body>
+<body onload="init()">
 <h3>${userName}'s Home</h3>
 <h5>파일 탐색/다운로드</h5>
 <hr>
@@ -70,7 +113,7 @@
         </div>
         <input type="submit">
     </form>
-    <form method="post" action="<c:url value="/files/user/mkdir"/>" enctype="multipart/form-data">
+    <form method="post" id="mkdir">
         <div>
             새 폴더 이름 : <input type="text" name="dirName" id="newDirName">
         </div>
